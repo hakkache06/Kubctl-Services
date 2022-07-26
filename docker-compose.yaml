@@ -1,0 +1,54 @@
+version: '3'
+services:
+  #################### Database container #####################
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    build: ./requirements/mariadb/
+    restart: always
+    env_file: .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - 'maria:/var/lib/mysql'
+    networks:
+      - inception_net
+  #################### Wordpress container ##################### 
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    build: ./requirements/wordpress/
+    restart: always
+    env_file: .env
+    depends_on:
+      - mariadb
+    ports:
+      - "9000:9000"
+    volumes:
+      - 'Wordpress:/var/www/html'
+    networks:
+      - inception_net
+  #################### Nginx container #####################
+  nginx:
+    image: nginx
+    container_name: nginx
+    build: ./requirements/nginx/
+    restart: always
+    env_file: .env
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - 'Wordpress:/var/www/html'
+    networks:
+      - inception_net
+  
+  #################### Volumes Section #####################
+volumes:
+  maria:
+  Wordpress:
+#################### Networks Section #####################
+networks:
+  inception_net:
+    driver: bridge
